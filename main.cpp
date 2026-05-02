@@ -33,7 +33,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 // stuff that runs when the program starts no i totally didn't just copy and paste this from a windows tutorial
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nCmdShow) {
     // Register the window class. prob used for like easy identification and grouping or smth
-    const char CLASS_NAME[]  = "Tower of hard pillars";
+    const char CLASS_NAME[]  = "Tohp";
+    
 
     WNDCLASS wc = { };
 
@@ -41,7 +42,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
     wc.hInstance     = hInstance; // handle to the application instance... whatever that means
     wc.lpszClassName = CLASS_NAME; // i mean... it says it ight there
     wc.hCursor       = NULL; // i'll deal with this later...
-    wc.hIcon         = NULL; // same with this...
+    wc.hIcon         = (HICON)LoadImage(hInstance, "icon.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_SHARED); // same with this...
 
     RegisterClass(&wc); // make it go like "yo windows this guy tryna play Tohp" and then windows is like "ok sounds good i'll write that down mkay"
 
@@ -53,7 +54,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
         (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME), // Window style (basically like any window except without minimize or maximize buttons)
 
         // Size and position (x, y, nwidth, nheight)
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        CW_USEDEFAULT, CW_USEDEFAULT, 1024, 764,
 
         NULL,       // Parent window    
         NULL,       // Menu

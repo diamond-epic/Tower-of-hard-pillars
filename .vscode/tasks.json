@@ -1,15 +1,22 @@
 {
     "tasks": [
         {
+            "label": "Compile Resource",
+            "type": "shell",
+            "command": "windres",
+            "args": ["resource.rc", "-O", "coff", "-o", "resource.res"]
+        },
+        {
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
             "command": "C:/msys64/ucrt64/bin/g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${workspaceFolder}\\main.cpp",
+                "${workspaceFolder}\\resource.res",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${workspaceFolder}\\${workspaceFolderBasename}.exe"
             ],
             "options": {
                 "cwd": "C:/msys64/ucrt64/bin"
