@@ -16,7 +16,8 @@
                 "${workspaceFolder}\\main.cpp",
                 "${workspaceFolder}\\resource.res",
                 "-o",
-                "${workspaceFolder}\\${workspaceFolderBasename}.exe"
+                "${workspaceFolder}\\${workspaceFolderBasename}.exe",
+                "-lgdi32"
             ],
             "options": {
                 "cwd": "C:/msys64/ucrt64/bin"

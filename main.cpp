@@ -1,9 +1,7 @@
-#include <iostream> // used for printing (cout) and input (cin)
 #include <windows.h> // for window management i think
 #include <string> // pretty self explanatory i hope
 #include <cmath> // did you know that cmath actually stands for complex math? actually idk if this is true don't quote me on this lmao
 #include <vector> // resizable arrays
-#include <fstream> // file reading
 
 // this'll be defined later don't worry nvm it has to be defined now
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -17,10 +15,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-
+            
             // All painting occurs here, between BeginPaint and EndPaint.
+            
 
-            FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
+            FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0,255,255)));
 
             EndPaint(hwnd, &ps);
         }
@@ -35,14 +34,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
     // Register the window class. prob used for like easy identification and grouping or smth
     const char CLASS_NAME[]  = "Tohp";
     
-
     WNDCLASS wc = { };
 
     wc.lpfnWndProc   = WindowProc; // pointer to the window procedure that basically handles everything after initialization
     wc.hInstance     = hInstance; // handle to the application instance... whatever that means
-    wc.lpszClassName = CLASS_NAME; // i mean... it says it ight there
+    wc.lpszClassName = CLASS_NAME; // ignore the errors they are stoopid
     wc.hCursor       = NULL; // i'll deal with this later...
-    wc.hIcon         = (HICON)LoadImage(hInstance, "icon.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_SHARED); // same with this...
+    wc.hIcon         = LoadIcon(hInstance, "MAINICON"); // icon that shows up in the menu. refer to the resource.rc file for the name
 
     RegisterClass(&wc); // make it go like "yo windows this guy tryna play Tohp" and then windows is like "ok sounds good i'll write that down mkay"
 
@@ -67,6 +65,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
         return 0;
     }
 
+    FreeConsole();
     ShowWindow(hwnd, nCmdShow); // actually makes the window visible
 
     // hot damn i use the word "actually" a lot anyways now message system
