@@ -3,28 +3,48 @@
 #include <cmath> // did you know that cmath actually stands for complex math? actually idk if this is true don't quote me on this lmao
 #include <vector> // resizable arrays
 
+// for menu items
+#define HMENU_GAME_HELP 1
+#define HMENU_GAME_QUIT 2
+
+#define HMENU_CHEATS_NOCLIP 3
+#define HMENU_CHEATS_GODMODE 4
+#define HMENU_CHEATS_ALLJUMP 5
+
 // this'll be defined later don't worry nvm it has to be defined now
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)
     {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            return 0;
 
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-            
-            // All painting occurs here, between BeginPaint and EndPaint.
-            
+        case WM_PAINT:
+            {
+                PAINTSTRUCT ps;
+                HDC hdc = BeginPaint(hwnd, &ps);
+                
+                // All painting occurs here, between BeginPaint and EndPaint.
+                
 
-            FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0,255,255)));
+                FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0,255,255)));
 
-            EndPaint(hwnd, &ps);
-        }
-        return 0;
+                EndPaint(hwnd, &ps);
+            }
+            return 0;
 
+        case WM_COMMAND:
+            switch (LOWORD(wParam))
+            {
+                case HMENU_GAME_HELP:
+                    ShellExecute(hwnd, "Open", "https://diamondepic.neocities.org", NULL, NULL, SW_SHOWNORMAL);
+                    break;
+                
+                case HMENU_GAME_QUIT:
+                    PostQuitMessage(0);
+                
+            }
+            return 0;
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
@@ -44,15 +64,51 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
     RegisterClass(&wc); // make it go like "yo windows this guy tryna play Tohp" and then windows is like "ok sounds good i'll write that down mkay"
 
+    HMENU hMenu = CreateMenu(); // create the menu for the main window
+
+    // CreateMenu() is also used to make the dropdown menus that go on the menu bar
+    HMENU hMenu_Game = CreateMenu();
+    HMENU hMenu_Cheats = CreateMenu();
+
+    // AppendMenu() attaches dropdown menus to the menu bar
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hMenu_Game, "Game");
+    // AppendMenu() can also add items to dropdown menus
+    AppendMenu(hMenu_Game, MF_STRING, HMENU_GAME_HELP, "Help");
+    AppendMenu(hMenu_Game, MF_STRING, HMENU_GAME_QUIT, "Quit");
+
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hMenu_Cheats, "Cheats");
+    
+    AppendMenu(hMenu_Cheats, MF_STRING, HMENU_CHEATS_NOCLIP, "Noclip");
+    AppendMenu(hMenu_Cheats, MF_STRING, HMENU_CHEATS_GODMODE, "God Mode");
+    AppendMenu(hMenu_Cheats, MF_STRING, HMENU_CHEATS_ALLJUMP, "All Jump");
+
+    int screenwidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenheight = GetSystemMetrics(SM_CYSCREEN);
+
     // ok now we actually create the window
     HWND hwnd = CreateWindowEx(
         WS_EX_CONTEXTHELP,              // Optional window styles. (this one has question mark)
         CLASS_NAME,                     // Window class
-        "Tower of hard pillars",       // Window text
-        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME), // Window style (basically like any window except without minimize or maximize buttons)
+        "Tower of hard pillars",        // Window text
+        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU), // Window style (basically like any window except without minimize or maximize buttons)
 
         // Size and position (x, y, nwidth, nheight)
-        CW_USEDEFAULT, CW_USEDEFAULT, 1024, 764,
+        (screenwidth - 1024) / 2, (screenheight - 764) / 2, 1024, 764,
+
+        NULL,       // Parent window    
+        hMenu,      // Menu
+        hInstance,  // Instance handle
+        NULL        // Additional application data
+        );
+
+    HWND hwnd2 = CreateWindowEx(
+        0,                           // Optional window styles.
+        CLASS_NAME,                     // Window class
+        "Health",                       // Window text
+        WS_CAPTION,                     // Window style
+
+        // Size and position (x, y, nwidth, nheight)
+        (screenwidth + 1124) / 2, (screenheight - 764) / 2, 200, 100,
 
         NULL,       // Parent window    
         NULL,       // Menu
@@ -60,12 +116,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
         NULL        // Additional application data
         );
 
-    if (hwnd == NULL) // no window = die
+    if (hwnd == NULL || hwnd2 == NULL) // no window = die
     {
         return 0;
     }
 
-    FreeConsole();
+    FreeConsole(); // hide the console that appears for some reason when you open the game
+    ShowWindow(hwnd2, nCmdShow); // order matters btw so this shows up behind all
     ShowWindow(hwnd, nCmdShow); // actually makes the window visible
 
     // hot damn i use the word "actually" a lot anyways now message system
