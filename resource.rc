@@ -1,4 +1,5 @@
-MAINICON ICON "icon.ico"
+MAINICON ICON "graphics/icon.ico"
+BEWARE BITMAP "graphics/beware.bmp"
 /*
 "MAINICON" is the name
 "ICON" is the type
