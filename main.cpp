@@ -3,18 +3,18 @@
 #include <cmath> // did you know that cmath actually stands for complex math? actually idk if this is true don't quote me on this lmao
 #include <vector> // resizable arrays
 #include <thread> // for multithreading - basically doing more than one thing at a time
+#include <iostream> // for console debugging
 
-// for menu items
-#define HMENU_GAME_HELP 1
-#define HMENU_GAME_QUIT 2
 
-#define HMENU_CHEATS_NOCLIP 3
-#define HMENU_CHEATS_GODMODE 4
-#define HMENU_CHEATS_ALLJUMP 5
+// for keeping track of windows
+std::vector<HWND> windows;
 
-#define HMENU_WINDOWS_SHOWALLWINDOWS 6
+enum Window {
+    MAIN,
+    HEALTH,
+    BEWARE
+};
 
-std::vector<HWND> windows; // for keeping track of windows
 void ShowAllWindows() {
     for (HWND window : windows) {
         BringWindowToTop(window);
@@ -22,12 +22,35 @@ void ShowAllWindows() {
     BringWindowToTop(windows[0]);
 }
 
-bool intro = true;
+// for menu items
+enum Menu {
+    HMENU_GAME_HELP,
+    HMENU_GAME_QUIT,
+    
+    HMENU_CHEATS_NOCLIP,
+    HMENU_CHEATS_GODMODE,
+    HMENU_CHEATS_ALLJUMP,
+    
+    HMENU_WINDOWS_SHOWALLWINDOWS
+};
+namespace Diamond {
+    HWND GetWindow(Window mustvebeenthewind) {return windows[mustvebeenthewind];}
+
+    class Bitmap {
+    
+    };
+}
 
 // this'll be defined later don't worry nvm it has to be defined now
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    std::cout << "message " << uMsg << " " << hwnd << "\n";
+    if (!windows.empty()) std::cout << windows[0] << "\n";
     switch (uMsg)
     {
+        case WM_CREATE:
+            windows.push_back(hwnd);
+            return 0;
+
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
@@ -38,12 +61,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 HDC hdc = BeginPaint(hwnd, &ps);
                 
                 // All painting occurs here, between BeginPaint and EndPaint.
-                
-
-                FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0,255,255)));
-
-                if (intro) {
-                    
+                if (hwnd == Diamond::GetWindow(BEWARE)) {
+                    FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0,0,0)));
+                    HBRUSH red = CreateSolidBrush(RGB(255,0,0));
+                    FillRect(hdc, RECT(), red)
+                }
+                else {
+                    FillRect(hdc, &ps.rcPaint, CreateSolidBrush(RGB(0,255,255)));
                 }
 
                 EndPaint(hwnd, &ps);
@@ -110,6 +134,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
     int screenwidth = GetSystemMetrics(SM_CXSCREEN);
     int screenheight = GetSystemMetrics(SM_CYSCREEN);
 
+    // ok now we actually create the window
+    HWND hwnd = CreateWindowEx(
+        WS_EX_CONTEXTHELP,              // Optional window styles. (this one has question mark)
+        CLASS_NAME,                     // Window class
+        "Tower of hard pillars",        // Window text
+        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU), // Window style (basically like any window except without minimize or maximize buttons)
+
+        // Size and position (x, y, nwidth, nheight)
+        (screenwidth - 1024) / 2, (screenheight - 764) / 2, 1024, 764,
+
+        NULL,       // Parent window    
+        hMenu,      // Menu
+        hInstance,  // Instance handle
+        NULL        // Additional application data
+        );
+
+    HWND hwnd2 = CreateWindowEx(
+        0,                           // Optional window styles.
+        CLASS_NAME,                     // Window class
+        "Health",                       // Window text
+        WS_CAPTION,                     // Window style
+
+        // Size and position (x, y, nwidth, nheight)
+        (screenwidth + 1124) / 2, (screenheight - 764) / 2, 200, 100,
+
+        NULL,       // Parent window    
+        NULL,       // Menu
+        hInstance,  // Instance handle
+        NULL        // Additional application data
+        );
+
     // warning popup that says "YOUR NOT READY..."
     HWND beware = CreateWindowEx(
         0,                              // Optional window styles.
@@ -126,60 +181,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
         NULL        // Additional application data
         );
 
-    // ok now we actually create the window
-    HWND hwnd = CreateWindowEx(
-        WS_EX_CONTEXTHELP,              // Optional window styles. (this one has question mark)
-        CLASS_NAME,                     // Window class
-        "Tower of hard pillars",        // Window text
-        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU), // Window style (basically like any window except without minimize or maximize buttons)
-
-        // Size and position (x, y, nwidth, nheight)
-        (screenwidth - 1024) / 2, (screenheight - 764) / 2, 1024, 764,
-
-        NULL,       // Parent window    
-        hMenu,      // Menu
-        hInstance,  // Instance handle
-        NULL        // Additional application data
-        );
-    windows.push_back(hwnd); // adds the window handle to a list of windows to keep track of em. yes i'm aware this is hardcoded af i'll clean it up later
-
-    HWND hwnd2 = CreateWindowEx(
-        0,                           // Optional window styles.
-        CLASS_NAME,                     // Window class
-        "Health",                       // Window text
-        WS_CAPTION,                     // Window style
-
-        // Size and position (x, y, nwidth, nheight)
-        (screenwidth + 1124) / 2, (screenheight - 764) / 2, 200, 100,
-
-        NULL,       // Parent window    
-        NULL,       // Menu
-        hInstance,  // Instance handle
-        NULL        // Additional application data
-        );
-    windows.push_back(hwnd2);
-
-    if (hwnd == NULL || hwnd2 == NULL || beware == NULL) // no window = die
-    {
-        return 0;
+    // no window = die
+    for (HWND window : windows) {
+        if (window == NULL) return 0;
     }
 
     // now we get to window showing shenanigans
     // create a thread so that you don't just see nothing for 4 seconds
     std::thread opening([beware, hwnd, hwnd2, nCmdShow]() {
-        FreeConsole(); // hide the console that appears for some reason when you open the game
+        // FreeConsole(); // hide the console that appears for some reason when you open the game
     
         ShowWindow(beware, nCmdShow);
     
         Sleep(4000);
     
-        CloseWindow(beware);
-        intro = false;
+        ShowWindow(beware, SW_HIDE);
     
         ShowWindow(hwnd2, nCmdShow); // order matters btw so this shows up behind all
         ShowWindow(hwnd, nCmdShow); // actually makes the window visible
 
         SetFocus(hwnd);
+        return;
     });
 
     if (opening.joinable()) opening.detach();
